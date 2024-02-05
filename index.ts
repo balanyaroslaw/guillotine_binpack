@@ -55,12 +55,18 @@ class Guillotine
         Rect.width = freeRect.width - item.width
         Rect.height = item.height
 
-        Rect.x = freeRect.x! + item.width
-        Rect.y = freeRect.y!;
+        if(freeRect.width>=item.width && freeRect.height >= item.height)
+        {
+            Rect.x = freeRect.x! + item.width
+            Rect.y = freeRect.y!;
+        }
 
         if(Rect.width > 0 && Rect.height > 0)
         {
-            this.freeRectList.push(Rect)
+            if(Rect.x! <= this.binWidth && Rect.y! <= this.binHeight)
+            {
+                this.freeRectList.push(Rect)
+            }
         }
 
         Rect = new FreeRect
@@ -68,12 +74,18 @@ class Guillotine
         Rect.width = freeRect.width
         Rect.height = freeRect.height - item.height
 
-        Rect.y = freeRect.y! + item.height
-        Rect.x = freeRect.x! 
+        if(freeRect.width>=item.width && freeRect.height >= item.height)
+        {
+            Rect.y = freeRect.y! + item.height
+            Rect.x = freeRect.x! 
+        }
 
         if(Rect.width > 0 && Rect.height > 0)
         {
-            this.freeRectList.push(Rect)
+            if(Rect.x! <= this.binWidth && Rect.y! <= this.binHeight)
+            {
+                this.freeRectList.push(Rect)
+            }
         }
 
         this.freeRectList = this.freeRectList.filter(element=>{return element!==freeRect})
@@ -130,14 +142,19 @@ class Guillotine
         {
             for(let j = 0; j < this.freeRectList.length; j++)
             {
-                if(bestShortSide===this.FindBestShortSide(this.itemsList[i],this.freeRectList[j]))
+                if(this.freeRectList[j].width>=this.itemsList[i].width && this.freeRectList[j].height>=this.itemsList[i].height)
                 {
-                    freeRect = this.freeRectList[j];
-                    item = this.itemsList[i];
-                    
-                    item.x = freeRect.x! + item.width
-                    item.y = freeRect.y! + item.height
-                }   
+                    if(bestShortSide===this.FindBestShortSide(this.itemsList[i],this.freeRectList[j]))
+                    {
+                        freeRect = this.freeRectList[j];
+                        item = this.itemsList[i];
+                        if(freeRect.width>=item.width && freeRect.height >= item.height)
+                        {
+                            item.x = freeRect.x! + item.width
+                            item.y = freeRect.y! + item.height
+                        }
+                    }      
+                }
             }
         }
 
@@ -166,6 +183,8 @@ const r: IRectangle[] = [
                         {width:550, height:220},
                         {width:100, height:100},
                         {width:450, height:50},
-                        {width:50, height:60}]
+                        {width:200, height:50},
+                        {width:50, height:60},
+                        {width:100, height:60}]
 const g = new Guillotine(700, 500, r)
 g.testPack()
