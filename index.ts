@@ -1,7 +1,7 @@
 /**Guillotine packing v.0.1*/
 /**Heuristic Choices: best_shortside */
 /**Split Rules: SplitShorterLeftoverAxis */
-/**------------------------------------------------------------------------------------------------------------------------------------------ */
+/**--------------------------------------------------------------------------------------------- */
 
 interface IRectangle{
     x?: number;
@@ -99,16 +99,69 @@ class Guillotine
         return Math.min(leftoverX, leftoverY)  
     } 
 
+    private RotateItem(item:IRectangle):IRectangle
+    {
+        const newItem = {width:item.height, height:item.width}
+        return newItem
+    }
+
     private Merge():void
     {
         for(let i = 0; i < this.freeRectList.length; i++)
         {
-            for(let j = 0; j < this.freeRectList.length; j++)
-            {
-                if(this.freeRectList[i].x! === this.freeRectList[j].x!)
+            for(let j = i+1; j < this.freeRectList.length; j++)
+            { 
+                if(i!==j)
                 {
-                    /*console.log(this.freeRectList[i])
-                    console.log(this.freeRectList[j])*/
+                    if(this.freeRectList[i].x! === this.freeRectList[j].x! && this.freeRectList[i].y! !== this.freeRectList[j].y!)
+                    {  
+                        if(Math.abs(this.freeRectList[i].height - this.freeRectList[j].y!)===this.freeRectList[i].y!)
+                        {
+                            const freeRect:IRectangle = new FreeRect;
+
+                            let firtsArea  = this.freeRectList[i].width * this.freeRectList[i].height
+                            let secondArea = this.freeRectList[j].width * this.freeRectList[j].height
+                            if(firtsArea+secondArea>firtsArea || firtsArea+secondArea>secondArea)
+                            {
+                                freeRect.width = this.freeRectList[i].width;
+                                freeRect.height = this.freeRectList[i].height + this.freeRectList[j].height
+
+                                freeRect.x! = this.freeRectList[i].x!
+                                freeRect.y! = Math.min(this.freeRectList[i].y!,this.freeRectList[j].y!)
+
+                                this.freeRectList = this.freeRectList.filter(freeRect=>{return freeRect!==this.freeRectList[i] && freeRect!==this.freeRectList[j]})
+
+                                this.freeRectList.push(freeRect)
+                            }
+                        }
+                    }
+                    if(this.freeRectList[i].y! === this.freeRectList[j].y! && this.freeRectList[i].x! !== this.freeRectList[j].x!)
+                    {
+                        if(Math.abs(this.freeRectList[i].width - this.freeRectList[j].x!)===this.freeRectList[i].x!)
+                        {
+                            const freeRect:IRectangle = new FreeRect;
+
+                            let firtsArea  = this.freeRectList[i].width * this.freeRectList[i].height
+                            let secondArea = this.freeRectList[j].width * this.freeRectList[j].height
+                            if(firtsArea+secondArea>firtsArea || firtsArea+secondArea>secondArea)
+                            {
+                                freeRect.width = this.freeRectList[i].width + this.freeRectList[j].width;
+                                freeRect.height = this.freeRectList[i].height
+
+                                freeRect.x! = Math.min(this.freeRectList[i].x!,this.freeRectList[j].x!)
+                                freeRect.y! = this.freeRectList[j].y!
+
+                                this.freeRectList = this.freeRectList.filter(freeRect=>{return freeRect!==this.freeRectList[i] && freeRect!==this.freeRectList[j]})
+
+                                this.freeRectList.push(freeRect)
+                            }
+                        }
+                    }
+
+                }
+                else
+                {
+                    continue
                 }
             }
         }
@@ -122,7 +175,7 @@ class Guillotine
 
     public Insert():void
     {
-        let shortSides:number[] = []
+        const shortSides:Array<number> = []
         for(let  i = 0; i < this.itemsList.length; i++)
         {
             for(let j = 0; j < this.freeRectList.length; j++)
@@ -153,7 +206,7 @@ class Guillotine
                             item.x = freeRect.x! + item.width
                             item.y = freeRect.y! + item.height
                         }
-                    }      
+                    } 
                 }
             }
         }
@@ -184,7 +237,6 @@ const r: IRectangle[] = [
                         {width:100, height:100},
                         {width:450, height:50},
                         {width:200, height:50},
-                        {width:50, height:60},
                         {width:100, height:60}]
 const g = new Guillotine(700, 500, r)
 g.testPack()

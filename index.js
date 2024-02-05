@@ -2,7 +2,7 @@
 /**Guillotine packing v.0.1*/
 /**Heuristic Choices: best_shortside */
 /**Split Rules: SplitShorterLeftoverAxis */
-/**------------------------------------------------------------------------------------------------------------------------------------------ */
+/**--------------------------------------------------------------------------------------------- */
 class FreeRect {
 }
 class Guillotine {
@@ -57,12 +57,47 @@ class Guillotine {
         const leftoverY = Math.abs(freeRect.height - item.height);
         return Math.min(leftoverX, leftoverY);
     }
+    RotateItem(item) {
+        const newItem = { width: item.height, height: item.width };
+        return newItem;
+    }
     Merge() {
         for (let i = 0; i < this.freeRectList.length; i++) {
-            for (let j = 0; j < this.freeRectList.length; j++) {
-                if (this.freeRectList[i].x === this.freeRectList[j].x) {
-                    /*console.log(this.freeRectList[i])
-                    console.log(this.freeRectList[j])*/
+            for (let j = i + 1; j < this.freeRectList.length; j++) {
+                if (i !== j) {
+                    if (this.freeRectList[i].x === this.freeRectList[j].x && this.freeRectList[i].y !== this.freeRectList[j].y) {
+                        if (Math.abs(this.freeRectList[i].height - this.freeRectList[j].y) === this.freeRectList[i].y) {
+                            const freeRect = new FreeRect;
+                            let firtsArea = this.freeRectList[i].width * this.freeRectList[i].height;
+                            let secondArea = this.freeRectList[j].width * this.freeRectList[j].height;
+                            if (firtsArea + secondArea > firtsArea || firtsArea + secondArea > secondArea) {
+                                freeRect.width = this.freeRectList[i].width;
+                                freeRect.height = this.freeRectList[i].height + this.freeRectList[j].height;
+                                freeRect.x = this.freeRectList[i].x;
+                                freeRect.y = Math.min(this.freeRectList[i].y, this.freeRectList[j].y);
+                                this.freeRectList = this.freeRectList.filter(freeRect => { return freeRect !== this.freeRectList[i] && freeRect !== this.freeRectList[j]; });
+                                this.freeRectList.push(freeRect);
+                            }
+                        }
+                    }
+                    if (this.freeRectList[i].y === this.freeRectList[j].y && this.freeRectList[i].x !== this.freeRectList[j].x) {
+                        if (Math.abs(this.freeRectList[i].width - this.freeRectList[j].x) === this.freeRectList[i].x) {
+                            const freeRect = new FreeRect;
+                            let firtsArea = this.freeRectList[i].width * this.freeRectList[i].height;
+                            let secondArea = this.freeRectList[j].width * this.freeRectList[j].height;
+                            if (firtsArea + secondArea > firtsArea || firtsArea + secondArea > secondArea) {
+                                freeRect.width = this.freeRectList[i].width + this.freeRectList[j].width;
+                                freeRect.height = this.freeRectList[i].height;
+                                freeRect.x = Math.min(this.freeRectList[i].x, this.freeRectList[j].x);
+                                freeRect.y = this.freeRectList[j].y;
+                                this.freeRectList = this.freeRectList.filter(freeRect => { return freeRect !== this.freeRectList[i] && freeRect !== this.freeRectList[j]; });
+                                this.freeRectList.push(freeRect);
+                            }
+                        }
+                    }
+                }
+                else {
+                    continue;
                 }
             }
         }
@@ -72,7 +107,7 @@ class Guillotine {
         this.packedItemsList.push(Rect);
     }
     Insert() {
-        let shortSides = [];
+        const shortSides = [];
         for (let i = 0; i < this.itemsList.length; i++) {
             for (let j = 0; j < this.freeRectList.length; j++) {
                 if (this.freeRectList[j].width >= this.itemsList[i].width && this.freeRectList[j].height >= this.itemsList[i].height) {
@@ -116,7 +151,6 @@ const r = [
     { width: 100, height: 100 },
     { width: 450, height: 50 },
     { width: 200, height: 50 },
-    { width: 50, height: 60 },
     { width: 100, height: 60 }
 ];
 const g = new Guillotine(700, 500, r);
