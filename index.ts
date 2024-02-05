@@ -55,21 +55,8 @@ class Guillotine
         Rect.width = freeRect.width - item.width
         Rect.height = item.height
 
-        if(freeRect.x! === 0 && freeRect.y! === 0)
-        {
-            Rect.x = item.width
-            Rect.y = freeRect.y!;
-        }
-        else if(freeRect.width+item.width>this.binWidth)
-        {
-            Rect.x = this.binWidth - item.width
-            Rect.y = (this.binHeight - freeRect.height)+item.height;
-        }
-        else
-        {
-            Rect.y = item.height;
-            Rect.x = (this.binWidth - freeRect.width) + item.width
-        }
+        Rect.x = freeRect.x! + item.width
+        Rect.y = freeRect.y!;
 
         if(Rect.width > 0 && Rect.height > 0)
         {
@@ -77,24 +64,12 @@ class Guillotine
         }
 
         Rect = new FreeRect
+
         Rect.width = freeRect.width
         Rect.height = freeRect.height - item.height
 
-        if(freeRect.width+item.width>this.binWidth && freeRect.width-item.width !== 0)
-        {
-            Rect.x = freeRect.width;
-            Rect.y = (this.binHeight - freeRect.height)+freeRect.height;
-        }
-        else if(freeRect.width+item.width>this.binWidth)
-        {
-            Rect.y = freeRect.y!-item.height
-            Rect.x = this.binWidth - freeRect.width
-        }
-        else
-        {
-            Rect.y = freeRect.height
-            Rect.x = this.binWidth - freeRect.width
-        }
+        Rect.y = freeRect.y! + item.height
+        Rect.x = freeRect.x! 
 
         if(Rect.width > 0 && Rect.height > 0)
         {
@@ -159,31 +134,9 @@ class Guillotine
                 {
                     freeRect = this.freeRectList[j];
                     item = this.itemsList[i];
-                    if(item.width < freeRect.width && item.height < freeRect.height && item.width + freeRect.width < this.binWidth)
-                    {
-                        item.x = freeRect.x! + item.width
-                        item.y = freeRect.y! + item.height
-                    }
-                    else if(item.width < freeRect.x! && item.height < freeRect.y! && item.width + freeRect.width > this.binWidth)
-                    {
-                        item.x = item.width
-                        item.y = (this.binHeight - freeRect.height) + item.height
-                    }
-                    else if(item.height === freeRect.height)
-                    {
-                        item.x = freeRect.x! - item.width
-                        item.y = freeRect.y!
-                    }
-                    else if(item.width === freeRect.width)
-                    {
-                        item.x = freeRect.x!
-                        item.y = freeRect.y! - item.height
-                    }
-                    else
-                    {
-                        item.x = freeRect.x! + item.width
-                        item.y = freeRect.y! + item.height
-                    }
+                    
+                    item.x = freeRect.x! + item.width
+                    item.y = freeRect.y! + item.height
                 }   
             }
         }
