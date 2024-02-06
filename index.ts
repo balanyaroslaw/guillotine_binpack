@@ -176,6 +176,7 @@ class Guillotine
     public Insert():void
     {
         const shortSides:Array<number> = []
+        const shortSidesRotated:Array<number> = []
         for(let  i = 0; i < this.itemsList.length; i++)
         {
             for(let j = 0; j < this.freeRectList.length; j++)
@@ -184,10 +185,14 @@ class Guillotine
                 {
                     shortSides.push(this.FindBestShortSide(this.itemsList[i],this.freeRectList[j]))
                 }
+                if(this.freeRectList[j].width>=this.RotateItem(this.itemsList[i]).width && this.freeRectList[j].height>=this.RotateItem(this.itemsList[i]).height)
+                {
+                    shortSidesRotated.push(this.FindBestShortSide(this.RotateItem(this.itemsList[i]), this.freeRectList[j]))
+                }
             }
         }
-
         let bestShortSide:number = Math.min(...shortSides)
+        let bestShortSideRotated:number = Math.min(...shortSidesRotated)
         let freeRect:IRectangle = new FreeRect;
         let item:IRectangle = {width:0, height:0}
         
@@ -195,24 +200,45 @@ class Guillotine
         {
             for(let j = 0; j < this.freeRectList.length; j++)
             {
-                if(this.freeRectList[j].width>=this.itemsList[i].width && this.freeRectList[j].height>=this.itemsList[i].height)
+                if(bestShortSideRotated<=bestShortSide)
                 {
-                    if(bestShortSide===this.FindBestShortSide(this.itemsList[i],this.freeRectList[j]))
+                    if(this.freeRectList[j].width>=this.RotateItem(this.itemsList[i]).width && this.freeRectList[j].height>=this.RotateItem(this.itemsList[i]).height)
                     {
-                        freeRect = this.freeRectList[j];
-                        item = this.itemsList[i];
-                        if(freeRect.width>=item.width && freeRect.height >= item.height)
+                        if(bestShortSideRotated===this.FindBestShortSide(this.RotateItem(this.itemsList[i]),this.freeRectList[j]))
                         {
-                            item.x = freeRect.x! + item.width
-                            item.y = freeRect.y! + item.height
+                            this.itemsList[i] = this.RotateItem(this.itemsList[i])
+                            freeRect = this.freeRectList[j];
+                            item = this.itemsList[i];
+    
+                            if(freeRect.width>=item.width && freeRect.height >= item.height)
+                            {
+                                item.x = freeRect.x! + item.width
+                                item.y = freeRect.y! + item.height
+                            }
                         }
-                    } 
+                    }
+                }
+                if(bestShortSideRotated>=bestShortSide)
+                {
+                    if(this.freeRectList[j].width>=this.itemsList[i].width && this.freeRectList[j].height>=this.itemsList[i].height)
+                    {
+                        if(bestShortSide===this.FindBestShortSide(this.itemsList[i],this.freeRectList[j]))
+                        {
+                            freeRect = this.freeRectList[j];
+                            item = this.itemsList[i];
+                            if(freeRect.width>=item.width && freeRect.height >= item.height)
+                            {
+                                item.x = freeRect.x! + item.width
+                                item.y = freeRect.y! + item.height
+                            }
+                        }
+                    }
                 }
             }
         }
 
         this.Merge()
-
+        
         this.AddItem(item)
 
         this.Split(item,freeRect)
@@ -220,23 +246,111 @@ class Guillotine
         this.itemsList = this.itemsList.filter(element=>{return element!==item})
     }
 
-    public testPack():void
+    public Packing():void
     {
         for(let i = 0; i < this.itemsListLength; i++)
         {
             this.Insert()
         }
-        
+
         console.log(this.freeRectList)
         console.log(this.packedItemsList)
     }
 }
+
+
+class Utility
+{
+    public RandomHEXColor():string
+    {
+        const color:string = '#' + Math.random().toString(16).substring(-6)
+        return color
+    }
+}
+class Visualization
+{   
+    private binWidth:number;
+    private binHeight:number;
+
+    private itemsCount:number;
+    private items:Array<IRectangle>;
+
+    private utility = new Utility
+    constructor(width:number, height:number, items:Array<IRectangle>)
+    {
+        if(width > 0 && height > 0)
+        {
+            this.binWidth = width;
+            this.binHeight = height
+        }
+
+        if(items.length > 0)
+        {
+            this.items = items
+            this.itemsCount = items.length
+        }
+
+    }
+
+    private CreateBin():void
+    {
+        const bin = document.createElement("body")
+
+        bin.classList.add("bin__container")
+
+        bin.style.position = 'absolute'
+        bin.style.width = this.binWidth.toString()+'px';
+        bin.style.height = this.binHeight.toString()+'px';
+
+        bin.style.borderStyle = 'solid'
+        bin.style.backgroundColor = '#77B5BF'
+
+        document.body.appendChild(bin)
+    }
+
+    private CreateItem(item:IRectangle):void
+    {
+        const block = document.createElement('block__container')
+
+        const bin = document.querySelector('.bin__container')!
+
+        const styles = window.getComputedStyle(bin);
+
+        block.style.position = 'absolute'
+        block.style.width = item.width.toString() + 'px'
+        block.style.height = item.height.toString() + 'px'
+
+        block.style.right = (parseInt(styles.right) + item.x!).toString() + 'px'
+        block.style.top = (parseInt(styles.bottom) + item.y!).toString() + 'px'
+
+        block.style.backgroundColor = this.utility.RandomHEXColor()
+
+        bin.appendChild(block)
+    }
+
+    private AddItems():void
+    {
+        for(let i = 0; i < this.items.length;i++)
+        {
+            this.CreateItem(this.items[i])
+        }
+    }
+
+    public PackingVisualization():void
+    {
+        this.CreateBin()
+        this.AddItems()
+    }
+}   
 const r: IRectangle[] = [
-                        {width:250, height:100},
-                        {width:550, height:220},
-                        {width:100, height:100},
-                        {width:450, height:50},
-                        {width:200, height:50},
-                        {width:100, height:60}]
+    {width:250, height:100},
+    {width:550, height:220},
+    {width:100, height:100},
+    {width:450, height:50},
+    {width:50, height:60},
+    {width:200, height:50},
+    {width:100, height:60} ]
 const g = new Guillotine(700, 500, r)
-g.testPack()
+g.Packing()
+const v = new Visualization(700, 500, r)
+v.PackingVisualization()

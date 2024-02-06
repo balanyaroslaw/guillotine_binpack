@@ -108,25 +108,45 @@ class Guillotine {
     }
     Insert() {
         const shortSides = [];
+        const shortSidesRotated = [];
         for (let i = 0; i < this.itemsList.length; i++) {
             for (let j = 0; j < this.freeRectList.length; j++) {
                 if (this.freeRectList[j].width >= this.itemsList[i].width && this.freeRectList[j].height >= this.itemsList[i].height) {
                     shortSides.push(this.FindBestShortSide(this.itemsList[i], this.freeRectList[j]));
                 }
+                if (this.freeRectList[j].width >= this.RotateItem(this.itemsList[i]).width && this.freeRectList[j].height >= this.RotateItem(this.itemsList[i]).height) {
+                    shortSidesRotated.push(this.FindBestShortSide(this.RotateItem(this.itemsList[i]), this.freeRectList[j]));
+                }
             }
         }
         let bestShortSide = Math.min(...shortSides);
+        let bestShortSideRotated = Math.min(...shortSidesRotated);
         let freeRect = new FreeRect;
         let item = { width: 0, height: 0 };
         for (let i = 0; i < this.itemsList.length; i++) {
             for (let j = 0; j < this.freeRectList.length; j++) {
-                if (this.freeRectList[j].width >= this.itemsList[i].width && this.freeRectList[j].height >= this.itemsList[i].height) {
-                    if (bestShortSide === this.FindBestShortSide(this.itemsList[i], this.freeRectList[j])) {
-                        freeRect = this.freeRectList[j];
-                        item = this.itemsList[i];
-                        if (freeRect.width >= item.width && freeRect.height >= item.height) {
-                            item.x = freeRect.x + item.width;
-                            item.y = freeRect.y + item.height;
+                if (bestShortSideRotated <= bestShortSide) {
+                    if (this.freeRectList[j].width >= this.RotateItem(this.itemsList[i]).width && this.freeRectList[j].height >= this.RotateItem(this.itemsList[i]).height) {
+                        if (bestShortSideRotated === this.FindBestShortSide(this.RotateItem(this.itemsList[i]), this.freeRectList[j])) {
+                            this.itemsList[i] = this.RotateItem(this.itemsList[i]);
+                            freeRect = this.freeRectList[j];
+                            item = this.itemsList[i];
+                            if (freeRect.width >= item.width && freeRect.height >= item.height) {
+                                item.x = freeRect.x + item.width;
+                                item.y = freeRect.y + item.height;
+                            }
+                        }
+                    }
+                }
+                if (bestShortSideRotated >= bestShortSide) {
+                    if (this.freeRectList[j].width >= this.itemsList[i].width && this.freeRectList[j].height >= this.itemsList[i].height) {
+                        if (bestShortSide === this.FindBestShortSide(this.itemsList[i], this.freeRectList[j])) {
+                            freeRect = this.freeRectList[j];
+                            item = this.itemsList[i];
+                            if (freeRect.width >= item.width && freeRect.height >= item.height) {
+                                item.x = freeRect.x + item.width;
+                                item.y = freeRect.y + item.height;
+                            }
                         }
                     }
                 }
@@ -137,7 +157,7 @@ class Guillotine {
         this.Split(item, freeRect);
         this.itemsList = this.itemsList.filter(element => { return element !== item; });
     }
-    testPack() {
+    Packing() {
         for (let i = 0; i < this.itemsListLength; i++) {
             this.Insert();
         }
@@ -150,8 +170,23 @@ const r = [
     { width: 550, height: 220 },
     { width: 100, height: 100 },
     { width: 450, height: 50 },
+    { width: 50, height: 60 },
     { width: 200, height: 50 },
     { width: 100, height: 60 }
 ];
 const g = new Guillotine(700, 500, r);
-g.testPack();
+g.Packing();
+class Visualization {
+    constructor(width, height, items) {
+        if (width > 0 && height > 0) {
+            this.binWidth = width;
+            this.binHeight = height;
+        }
+        if (items.length > 0) {
+            this.items = items;
+            this.itemsCount = items.length;
+        }
+    }
+    CreateBin() {
+    }
+}
