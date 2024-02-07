@@ -163,21 +163,18 @@ class Guillotine {
         }
         console.log(this.freeRectList);
         console.log(this.packedItemsList);
+        return this.packedItemsList;
     }
 }
-const r = [
-    { width: 250, height: 100 },
-    { width: 550, height: 220 },
-    { width: 100, height: 100 },
-    { width: 450, height: 50 },
-    { width: 50, height: 60 },
-    { width: 200, height: 50 },
-    { width: 100, height: 60 }
-];
-const g = new Guillotine(700, 500, r);
-g.Packing();
+class Utility {
+    RandomHEXColor() {
+        const color = '#' + Math.random().toString(16).slice(-3);
+        return color;
+    }
+}
 class Visualization {
     constructor(width, height, items) {
+        this.utility = new Utility;
         if (width > 0 && height > 0) {
             this.binWidth = width;
             this.binHeight = height;
@@ -188,5 +185,95 @@ class Visualization {
         }
     }
     CreateBin() {
+        const checkBin = document.querySelector('.bin__container');
+        if (!checkBin) {
+            const bin = document.createElement('div');
+            const body = document.querySelector('body');
+            bin.classList.add("bin__container");
+            bin.style.position = 'absolute';
+            bin.style.width = this.binWidth.toString() + 'px';
+            bin.style.height = this.binHeight.toString() + 'px';
+            bin.style.borderStyle = 'solid';
+            bin.style.backgroundColor = '#77B5BF';
+            body.appendChild(bin);
+        }
+        else {
+            checkBin.remove();
+            const bin = document.createElement('div');
+            const body = document.querySelector('body');
+            bin.classList.add("bin__container");
+            bin.style.position = 'absolute';
+            bin.style.width = this.binWidth.toString() + 'px';
+            bin.style.height = this.binHeight.toString() + 'px';
+            bin.style.borderStyle = 'solid';
+            bin.style.backgroundColor = '#77B5BF';
+            body.appendChild(bin);
+        }
     }
+    CreateItem(item) {
+        const colorList = [];
+        const block = document.createElement('div');
+        block.classList.add('block__container');
+        const bin = document.querySelector('.bin__container');
+        const styles = window.getComputedStyle(bin);
+        block.style.position = 'absolute';
+        block.style.width = item.width.toString() + 'px';
+        block.style.height = item.height.toString() + 'px';
+        block.style.right = (this.binWidth - item.x).toString() + 'px';
+        block.style.top = (this.binHeight - item.y).toString() + 'px';
+        if (!colorList.includes(this.utility.RandomHEXColor())) {
+            colorList.push(this.utility.RandomHEXColor());
+            block.style.backgroundColor = this.utility.RandomHEXColor();
+            block.style.backgroundImage = `linear-gradient(to bottom right, ${block.style.backgroundColor}, grey)`;
+        }
+        bin.appendChild(block);
+    }
+    AddItems() {
+        for (let i = 0; i < this.itemsCount; i++) {
+            this.CreateItem(this.items[i]);
+        }
+    }
+    PackingVisualization() {
+        this.CreateBin();
+        this.AddItems();
+    }
+}
+class Options {
+    CountItemsSettings() {
+        this.itemsListLength = parseInt(document.getElementsByClassName("count-option")[0].value);
+    }
+    RangeItemSettings() {
+        this.rangeWidth = { max: parseInt(document.getElementsByClassName("max-width")[0].value), min: parseInt(document.getElementsByClassName("min-width")[0].value) };
+        this.rangeHeight = { max: parseInt(document.getElementsByClassName("max-height")[0].value), min: parseInt(document.getElementsByClassName("min-height")[0].value) };
+    }
+    BinSettings() {
+        this.bin = { width: parseInt(document.getElementsByClassName("width-option")[0].value), height: parseInt(document.getElementsByClassName("height-option")[0].value) };
+    }
+    CreateRandomItem() {
+        const item = { width: 0, height: 0 };
+        item.width = Math.floor(Math.random() * (this.rangeWidth.max - this.rangeWidth.min)) + this.rangeWidth.min;
+        item.height = Math.floor(Math.random() * (this.rangeHeight.max - this.rangeHeight.min)) + this.rangeHeight.min;
+        return item;
+    }
+    CreateItemsList() {
+        for (let i = 0; i < this.itemsListLength; i++) {
+            this.items.push(this.CreateRandomItem());
+        }
+    }
+    constructor() {
+        this.items = [];
+        this.CountItemsSettings();
+        this.BinSettings();
+        this.RangeItemSettings();
+        this.CreateItemsList();
+    }
+    Apply() {
+        const g = new Guillotine(this.bin.width, this.bin.height, this.items);
+        const v = new Visualization(this.bin.width, this.bin.height, g.Packing());
+        v.PackingVisualization();
+    }
+}
+function Apply() {
+    const settings = new Options;
+    settings.Apply();
 }

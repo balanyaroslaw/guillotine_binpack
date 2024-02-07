@@ -9,6 +9,11 @@ interface IRectangle{
     width:number;
     height:number;
 }
+interface ISettings
+{
+    max:number;
+    min:number;
+}
 class FreeRect implements IRectangle
 {
     public x:number;
@@ -246,15 +251,15 @@ class Guillotine
         this.itemsList = this.itemsList.filter(element=>{return element!==item})
     }
 
-    public Packing():void
+    public Packing():Array<IRectangle>
     {
         for(let i = 0; i < this.itemsListLength; i++)
         {
             this.Insert()
         }
-
         console.log(this.freeRectList)
         console.log(this.packedItemsList)
+        return this.packedItemsList
     }
 }
 
@@ -263,7 +268,7 @@ class Utility
 {
     public RandomHEXColor():string
     {
-        const color:string = '#' + Math.random().toString(16).substring(-6)
+        const color:string = '#' + Math.random().toString(16).slice(-3)
         return color
     }
 }
@@ -294,24 +299,50 @@ class Visualization
 
     private CreateBin():void
     {
-        const bin = document.createElement("body")
+        const checkBin = document.querySelector('.bin__container')
+        if(!checkBin)
+        {
+            const bin = document.createElement('div')
 
-        bin.classList.add("bin__container")
+            const body = document.querySelector('body')!
+    
+            bin.classList.add("bin__container")
+    
+            bin.style.position = 'absolute'
+            bin.style.width = this.binWidth.toString()+'px';
+            bin.style.height = this.binHeight.toString()+'px';
+    
+            bin.style.borderStyle = 'solid'
+            bin.style.backgroundColor = '#77B5BF'
+    
+            body.appendChild(bin)
+        }
+        else
+        {
+            checkBin.remove()
+            const bin = document.createElement('div')
 
-        bin.style.position = 'absolute'
-        bin.style.width = this.binWidth.toString()+'px';
-        bin.style.height = this.binHeight.toString()+'px';
-
-        bin.style.borderStyle = 'solid'
-        bin.style.backgroundColor = '#77B5BF'
-
-        document.body.appendChild(bin)
+            const body = document.querySelector('body')!
+    
+            bin.classList.add("bin__container")
+    
+            bin.style.position = 'absolute'
+            bin.style.width = this.binWidth.toString()+'px';
+            bin.style.height = this.binHeight.toString()+'px';
+    
+            bin.style.borderStyle = 'solid'
+            bin.style.backgroundColor = '#77B5BF'
+    
+            body.appendChild(bin)
+        }
     }
 
     private CreateItem(item:IRectangle):void
     {
-        const block = document.createElement('block__container')
+        const colorList:Array<string> = []
 
+        const block = document.createElement('div')
+        block.classList.add('block__container')
         const bin = document.querySelector('.bin__container')!
 
         const styles = window.getComputedStyle(bin);
@@ -320,19 +351,25 @@ class Visualization
         block.style.width = item.width.toString() + 'px'
         block.style.height = item.height.toString() + 'px'
 
-        block.style.right = (parseInt(styles.right) + item.x!).toString() + 'px'
-        block.style.top = (parseInt(styles.bottom) + item.y!).toString() + 'px'
+        block.style.right = (this.binWidth - item.x!).toString() + 'px'
+        block.style.top = (this.binHeight - item.y!).toString() + 'px'
+        
 
-        block.style.backgroundColor = this.utility.RandomHEXColor()
+        if(!colorList.includes(this.utility.RandomHEXColor()))
+        {
+            colorList.push(this.utility.RandomHEXColor())
+            block.style.backgroundColor = this.utility.RandomHEXColor()
+            block.style.backgroundImage = `linear-gradient(to bottom right, ${block.style.backgroundColor}, grey)`
+        }
 
         bin.appendChild(block)
     }
 
     private AddItems():void
     {
-        for(let i = 0; i < this.items.length;i++)
+        for(let i = 0; i < this.itemsCount;i++)
         {
-            this.CreateItem(this.items[i])
+           this.CreateItem(this.items[i])
         }
     }
 
@@ -342,15 +379,70 @@ class Visualization
         this.AddItems()
     }
 }   
-const r: IRectangle[] = [
-    {width:250, height:100},
-    {width:550, height:220},
-    {width:100, height:100},
-    {width:450, height:50},
-    {width:50, height:60},
-    {width:200, height:50},
-    {width:100, height:60} ]
-const g = new Guillotine(700, 500, r)
-g.Packing()
-const v = new Visualization(700, 500, r)
-v.PackingVisualization()
+
+class Options
+{
+    private bin:IRectangle;
+    
+    private items:Array<IRectangle> = []
+    private itemsListLength:number;
+
+    private rangeWidth:ISettings;
+    private rangeHeight:ISettings;
+
+    private CountItemsSettings():void
+    {
+        this.itemsListLength = parseInt((<HTMLInputElement>document.getElementsByClassName("count-option")[0]).value)
+    }
+
+    private RangeItemSettings():void
+    {
+        this.rangeWidth = {max:parseInt((<HTMLInputElement>document.getElementsByClassName("max-width")[0]).value),min:parseInt((<HTMLInputElement>document.getElementsByClassName("min-width")[0]).value)}
+
+        this.rangeHeight = {max:parseInt((<HTMLInputElement>document.getElementsByClassName("max-height")[0]).value), min:parseInt((<HTMLInputElement>document.getElementsByClassName("min-height")[0]).value)}
+    }
+
+    private BinSettings():void
+    {
+        this.bin = {width:parseInt((<HTMLInputElement>document.getElementsByClassName("width-option")[0]).value), height:parseInt((<HTMLInputElement>document.getElementsByClassName("height-option")[0]).value)}
+    }
+
+    private CreateRandomItem():IRectangle
+    {
+        const item:IRectangle = {width:0, height:0}
+
+        item.width = Math.floor(Math.random() * (this.rangeWidth.max - this.rangeWidth.min) ) + this.rangeWidth.min;
+        item.height = Math.floor(Math.random() * (this.rangeHeight.max - this.rangeHeight.min) ) + this.rangeHeight.min;
+
+        return item;
+    }
+
+    private CreateItemsList():void
+    {
+        for(let i = 0; i < this.itemsListLength; i++)
+        {
+            this.items.push(this.CreateRandomItem())
+        }
+    }
+
+    constructor()
+    {
+        this.CountItemsSettings()
+        this.BinSettings()
+        this.RangeItemSettings()
+        this.CreateItemsList()
+    }
+
+    public Apply():void
+    {
+        const g = new Guillotine(this.bin.width, this.bin.height, this.items)
+        const v = new Visualization(this.bin.width, this.bin.height, g.Packing())
+
+        v.PackingVisualization()
+    }
+}
+function Apply():void
+{
+    const settings = new Options
+    settings.Apply()
+}

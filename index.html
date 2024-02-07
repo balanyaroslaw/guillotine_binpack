@@ -6,7 +6,45 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <div class="option__container">
+        <div class="bin-options__container">
+            <label for="width-option">Bin width</label>
+            <input type="text" class="width-option" id="width-option">
+            <label for="height-option">Bin height</label>
+            <input type="text" class="height-option" id="height-option">
+        </div>
+        <div class="blocks__container">
+            <label for="max-width">Max width</label>
+            <input type="text" class="max-width" id="max-width">
+            <label for="min-width">Min width</label>
+            <input type="text" class="min-width" id="min-width">
+
+            <label for="max-height">Max height</label>
+            <input type="text" class="max-height" id="max-height">
+            <label for="min-height">Min height</label>
+            <input type="text" class="min-height" id="min-height">
+
+        </div>
+        <div class="items__container">
+            <label for="count-option">Blocks count</label>
+            <input type="text" class="count-option" id="count-option">
+        </div>
+        <div class="apply__container">
+            <button class="apply__button" onclick="Apply()">Apply</button>
+        </div>
+    </div>
 </body>
+<style>
+    .bin__container
+    {
+        margin: 20px 0px 0px 50px;
+        background-image: linear-gradient(to top right, #77B5BF, rgb(19, 43, 108))
+    }
+    .apply__button
+    {
+        width: 70px;
+        height: 30px;
+    }
+</style>
 <script src="index.js"></script>
 </html>
